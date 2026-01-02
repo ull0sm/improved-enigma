@@ -178,6 +178,7 @@ def handle_oauth_callback() -> Optional[Dict[str, Any]]:
 def sign_out() -> bool:
     """Sign out the current user."""
     supabase_ok = True
+    clear_ok = True
     try:
         supabase = get_supabase_client()
         supabase.auth.sign_out()
@@ -190,8 +191,9 @@ def sign_out() -> bool:
         clear_session()
     except Exception as e:
         st.error(f"Error clearing session: {e}")
+        clear_ok = False
     
-    return supabase_ok
+    return supabase_ok or clear_ok
 
 
 def get_current_session() -> Optional[Dict[str, Any]]:

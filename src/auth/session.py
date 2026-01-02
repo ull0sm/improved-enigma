@@ -113,6 +113,7 @@ def restore_session_from_cookie():
                 else:
                     clear_session()
             else:
+                # Tokens were present but did not produce a valid session; drop any stale cookie
                 clear_session()
     except Exception as e:
         print(f"Session restore failed: {e}") 
