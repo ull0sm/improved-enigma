@@ -6,30 +6,8 @@ Manages user authentication via Supabase Auth (Email + Google OAuth)
 import streamlit as st
 from typing import Optional, Dict, Any
 from src.auth.supabase_client import get_supabase_client
-
-
-def check_email_whitelist(email: str) -> Dict[str, Any]:
-    """
-    Check if email is in the allowed_emails whitelist.
-    Returns dict with 'allowed' and 'is_admin' status.
-    """
-    try:
-        supabase = get_supabase_client()
-        result = supabase.table('allowed_emails')\
-            .select('*')\
-            .eq('email', email.lower().strip())\
-            .execute()
-        
-        if not result.data:
-            return {'allowed': False, 'is_admin': False}
-        
-        return {
-            'allowed': True,
-            'is_admin': result.data[0].get('is_admin', False)
-        }
-    except Exception as e:
-        st.error(f"Error checking whitelist: {e}")
-        return {'allowed': False, 'is_admin': False}
+from src.auth.session import clear_session
+from src.auth.whitelist import check_email_whitelist
 
 
 def sign_up_with_email(email: str, password: str) -> Dict[str, Any]:
@@ -199,19 +177,23 @@ def handle_oauth_callback() -> Optional[Dict[str, Any]]:
 
 def sign_out() -> bool:
     """Sign out the current user."""
+    supabase_ok = True
+    clear_ok = True
     try:
         supabase = get_supabase_client()
         supabase.auth.sign_out()
-        
-        # Clear session state
-        for key in ['user', 'session', 'is_admin', 'coach', 'onboarding_complete']:
-            if key in st.session_state:
-                del st.session_state[key]
-        
-        return True
     except Exception as e:
         st.error(f"Error signing out: {e}")
-        return False
+        supabase_ok = False
+    
+    try:
+        # Clear session state and cookies
+        clear_session()
+    except Exception as e:
+        st.error(f"Error clearing session: {e}")
+        clear_ok = False
+    
+    return supabase_ok and clear_ok
 
 
 def get_current_session() -> Optional[Dict[str, Any]]:

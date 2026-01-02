@@ -6,7 +6,7 @@ Handles user session state, route protection, and role-based access
 import streamlit as st
 from typing import Optional, Dict, Any
 from src.auth.supabase_client import get_supabase_client
-from src.auth.auth_handler import check_email_whitelist
+from src.auth.whitelist import check_email_whitelist
 import extra_streamlit_components as stx
 import datetime
 import time
@@ -112,8 +112,12 @@ def restore_session_from_cookie():
                     st.rerun() # Force rerun to reflect login state immediately
                 else:
                     clear_session()
+            else:
+                # Tokens were present but did not produce a valid session; drop any stale cookie
+                clear_session()
     except Exception as e:
         print(f"Session restore failed: {e}") 
+        clear_session()
 
 
 

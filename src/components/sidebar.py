@@ -12,6 +12,12 @@ from src.services.config_service import get_tournament_name
 def render_sidebar():
     """Render the navigation sidebar."""
     
+    def _perform_logout():
+        if sign_out():
+            st.switch_page("pages/1_🔐_Login.py")
+        else:
+            st.error("Unable to sign out right now. Please try again.")
+    
     with st.sidebar:
         # App Title/Logo
         st.markdown("""
@@ -93,9 +99,12 @@ def render_sidebar():
             # Logout
             st.markdown("---")
             if st.button("🚪 Sign Out", key="logout_btn", use_container_width=True):
-                clear_session()
-                st.rerun()
-                st.switch_page("pages/1_🔐_Login.py")
+                _perform_logout()
+        
+        elif is_authenticated():
+            st.markdown("---")
+            if st.button("🚪 Sign Out", key="logout_btn_basic", use_container_width=True):
+                _perform_logout()
         
         # Footer
         st.markdown("""
