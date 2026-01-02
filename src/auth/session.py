@@ -6,7 +6,6 @@ Handles user session state, route protection, and role-based access
 import streamlit as st
 from typing import Optional, Dict, Any
 from src.auth.supabase_client import get_supabase_client
-from src.auth.auth_handler import check_email_whitelist
 import extra_streamlit_components as stx
 import datetime
 import time
@@ -95,6 +94,7 @@ def restore_session_from_cookie():
         
         # Check if we have valid dictionary data
         if isinstance(token_data, dict) and 'access_token' in token_data and 'refresh_token' in token_data:
+            from src.auth.auth_handler import check_email_whitelist
             response = supabase.auth.set_session(
                 token_data['access_token'],
                 token_data['refresh_token']
