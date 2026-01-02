@@ -112,8 +112,11 @@ def restore_session_from_cookie():
                     st.rerun() # Force rerun to reflect login state immediately
                 else:
                     clear_session()
+            else:
+                clear_session()
     except Exception as e:
         print(f"Session restore failed: {e}") 
+        clear_session()
 
 
 

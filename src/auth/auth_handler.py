@@ -202,15 +202,17 @@ def sign_out() -> bool:
     try:
         supabase = get_supabase_client()
         supabase.auth.sign_out()
-        
-        # Clear session state
-        for key in ['user', 'session', 'is_admin', 'coach', 'onboarding_complete']:
-            if key in st.session_state:
-                del st.session_state[key]
-        
-        return True
     except Exception as e:
         st.error(f"Error signing out: {e}")
+        return False
+    
+    try:
+        # Clear session state and cookies
+        from src.auth.session import clear_session
+        clear_session()
+        return True
+    except Exception as e:
+        st.error(f"Error clearing session: {e}")
         return False
 
 

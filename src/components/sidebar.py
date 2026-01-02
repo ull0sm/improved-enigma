@@ -93,9 +93,16 @@ def render_sidebar():
             # Logout
             st.markdown("---")
             if st.button("🚪 Sign Out", key="logout_btn", use_container_width=True):
-                clear_session()
-                st.rerun()
+                sign_out()
                 st.switch_page("pages/1_🔐_Login.py")
+                st.rerun()
+        
+        elif is_authenticated():
+            st.markdown("---")
+            if st.button("🚪 Sign Out", key="logout_btn_basic", use_container_width=True):
+                sign_out()
+                st.switch_page("pages/1_🔐_Login.py")
+                st.rerun()
         
         # Footer
         st.markdown("""
