@@ -209,7 +209,7 @@ def sign_out() -> bool:
     
     try:
         # Clear session state and cookies
-        from src.auth.session import clear_session
+        from src.auth.session import clear_session  # Local import avoids circular dependency during module load
         clear_session()
     except Exception as e:
         st.error(f"Error clearing session: {e}")
