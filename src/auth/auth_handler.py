@@ -193,7 +193,7 @@ def sign_out() -> bool:
         st.error(f"Error clearing session: {e}")
         clear_ok = False
     
-    return supabase_ok or clear_ok
+    return supabase_ok and clear_ok
 
 
 def get_current_session() -> Optional[Dict[str, Any]]:

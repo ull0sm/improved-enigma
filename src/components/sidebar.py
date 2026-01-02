@@ -15,6 +15,8 @@ def render_sidebar():
     def _perform_logout():
         if sign_out():
             st.switch_page("pages/1_🔐_Login.py")
+        else:
+            st.error("Unable to sign out right now. Please try again.")
     
     with st.sidebar:
         # App Title/Logo
