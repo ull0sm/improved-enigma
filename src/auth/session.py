@@ -7,15 +7,8 @@ import streamlit as st
 from typing import Optional, Dict, Any
 from src.auth.supabase_client import get_supabase_client
 from src.auth.whitelist import check_email_whitelist
-import extra_streamlit_components as stx
-import datetime
-import time
 
-# Cookie Manager
-# We must use cache_resource to keep the component instance alive
-@st.cache_resource
-def get_cookie_manager():
-    return stx.CookieManager(key="auth_cookie_manager")
+
 
 
 
@@ -44,80 +37,10 @@ def set_user_session(user: Any, session: Any, is_admin: bool = False):
     # Load coach profile if exists
     load_coach_profile()
     
-    # Persist session to cookie
-    persist_session_to_cookie(session)
 
 
-def persist_session_to_cookie(session: Any):
-    """Save Supabase session tokens to browser cookie (30 days)."""
-    try:
-        cookie_manager = get_cookie_manager()
-        # Save access and refresh tokens
-        # Values are typically strings in Supabase session object
-        token_data = {
-            "access_token": session.access_token,
-            "refresh_token": session.refresh_token
-        }
-        
-        # Set cookie to expire in 30 days
-        expires_at = datetime.datetime.now() + datetime.timedelta(days=30)
-        
-        cookie_manager.set(
-            "supabase_session", 
-            token_data, 
-            expires_at=expires_at,
-            key="set_session_cookie"
-        )
-    except Exception as e:
-        st.warning(f"Failed to save session cookie: {e}")
 
 
-def restore_session_from_cookie():
-    """Attempt to restore session from browser cookie on app load."""
-    # If already authenticated, skip
-    if is_authenticated():
-        return
-
-    try:
-        cookie_manager = get_cookie_manager()
-        
-        # Get cookies (no loop to avoid duplicate key error)
-        # The component should trigger a rerun when data is ready
-        cookies = cookie_manager.get_all()
-        
-        token_data = cookies.get("supabase_session") if cookies else None
-        
-        if not token_data:
-            return
-
-        # Restore Supabase session
-        supabase = get_supabase_client()
-        
-        # Check if we have valid dictionary data
-        if isinstance(token_data, dict) and 'access_token' in token_data and 'refresh_token' in token_data:
-            response = supabase.auth.set_session(
-                token_data['access_token'],
-                token_data['refresh_token']
-            )
-            
-            if response.user and response.session:
-                # Validate whitelist again to be safe
-                whitelist = check_email_whitelist(response.user.email)
-                if whitelist['allowed']:
-                    # Manually set session state without triggering another cookie write (recursion)
-                    st.session_state.user = response.user
-                    st.session_state.session = response.session
-                    st.session_state.is_admin = whitelist['is_admin']
-                    load_coach_profile()
-                    st.rerun() # Force rerun to reflect login state immediately
-                else:
-                    clear_session()
-            else:
-                # Tokens were present but did not produce a valid session; drop any stale cookie
-                clear_session()
-    except Exception as e:
-        print(f"Session restore failed: {e}") 
-        clear_session()
 
 
 
@@ -229,11 +152,6 @@ def clear_session():
         if key in st.session_state:
             del st.session_state[key]
     
-    # Clear cookie
-    try:
-        cookie_manager = get_cookie_manager()
-        cookie_manager.delete("supabase_session", key="delete_session_cookie")
-    except Exception as e:
-        print(f"Error clearing cookie: {e}")
+
 
     st.session_state.current_page = 'login'

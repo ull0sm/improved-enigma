@@ -4,4 +4,3 @@ pandas
 openpyxl
 python-dotenv
 st-supabase-connection
-extra-streamlit-components

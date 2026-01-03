@@ -24,12 +24,11 @@ def load_css():
 load_css()
 
 # Initialize session state
-from src.auth.session import init_session_state, is_authenticated, is_onboarding_complete, restore_session_from_cookie
+from src.auth.session import init_session_state, is_authenticated, is_onboarding_complete
 
 init_session_state()
 
-# Attempt to restore session from cookie (Persistent Auth)
-restore_session_from_cookie()
+
 
 # Check for OAuth callback (when returning from Google)
 from src.auth.auth_handler import handle_oauth_callback
